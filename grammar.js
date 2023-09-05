@@ -18,6 +18,7 @@ const PREC = {
   POWER: 240,
   MEMBER: 250,
   CALL: 260,
+  TYPE_PATH: 300,
 };
 
 module.exports = grammar({
@@ -45,7 +46,7 @@ module.exports = grammar({
     _declaration_statement: $ => choice(
       $.empty_statement,
       $.let_declaration,
-      $.bring_declaration, // TODO
+      $.bring_declaration,
     ),
 
     let_declaration: $ => seq(
@@ -82,6 +83,8 @@ module.exports = grammar({
       $.continue_expression,
       $.index_expression,
       $.new_expression,
+      $.array_literal_expression,
+      $.object_literal_expression,
       $.literal,
       $._expression_ending_with_block,
     ),
@@ -191,8 +194,10 @@ module.exports = grammar({
 
     block: $ => seq(
       '{',
-      repeat($._statement),
-      optional($._expression),
+      choice(
+        seq(repeat1($.empty_statement), optional($._expression)),
+        $._expression,
+      ),
       '}',
     ),
 
@@ -252,17 +257,34 @@ module.exports = grammar({
       ')'
     )),
 
-    identifier: ($) => /([A-Za-z_$][A-Za-z_$0-9]*)/,
-
     member_expression: $ => prec.left(PREC.MEMBER, seq(
       $._expression,
       $.access_operator,
       $.identifier,
     )),
 
-    access_operator: $ => choice(
+    access_operator: _ => choice(
       '.',
       '?.',
+    ),
+
+    array_literal_expression: $ => seq(
+      '[',
+      sepBy(',', $._expression),
+      ']',
+    ),
+
+    object_literal_expression: $ => seq(
+      optional($.type_path),
+      '{',
+      sepBy(',', $.object_literal_property),
+      '}',
+    ),
+
+    object_literal_property: $ => seq(
+      field('key', $.identifier),
+      ':',
+      field('value', $._expression),
     ),
 
     type_annotation: $ => seq(
@@ -275,10 +297,9 @@ module.exports = grammar({
       $.function_type,
       $.optional_type,
       $.container_type,
-      $.primitive_type,
     ),
 
-    type_path: $ => sepBy1('.', $.identifier),
+    type_path: $ => prec(PREC.TYPE_PATH, sepBy1('.', $.identifier)),
 
     function_type: $ => prec.right(seq(
       optional(field('phase', $.phase_specifier)),
@@ -298,9 +319,7 @@ module.exports = grammar({
       seq('<', field('element_type', $._type), '>'),
     ),
 
-    primitive_type: $ => choice('num', 'bool', 'any', 'str', 'void', 'duration'),
-
-    phase_specifier: $ => choice(
+    phase_specifier: _ => choice(
       'inflight',
       // 'preflight'
       // 'unphased'
@@ -310,11 +329,15 @@ module.exports = grammar({
       $.number_literal,
       $.string_literal,
       $.boolean_literal,
+      $.nil_literal,
     ),
 
     number_literal: $ => /\d+/,
     string_literal: $ => /"[^"]*"/,
     boolean_literal: $ => choice('true', 'false'),
+    nil_literal: $ => 'nil',
+
+    identifier: _ => /([A-Za-z_$][A-Za-z_$0-9]*)/,
   }
 });
 
