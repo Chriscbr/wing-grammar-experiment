@@ -1,0 +1,28 @@
+{
+  "name": "tree-sitter-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bindings/node",
+  "scripts": {
+    "watch": "nodemon --watch grammar.js --watch src/scanner.c --exec \"tree-sitter generate && tree-sitter build-wasm && tree-sitter playground -q\"",
+    "tree-sitter": "tree-sitter",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "tree-sitter": [
+    {
+      "scope": "source.idk",
+      "file-types": [
+        "idk"
+      ]
+    }
+  ],
+  "dependencies": {
+    "nan": "^2.17.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "tree-sitter-cli": "0.20.6"
+  }
+}
