@@ -1,6 +1,7 @@
 const PREC = {
   RETURN: 0,
   ASSIGN: 10,
+  BLOCK_EXPRESSION: 20,
   LOGICAL_OR: 110,
   LOGICAL_AND: 120,
   INCLUSIVE_OR: 130,
@@ -22,42 +23,73 @@ const PREC = {
 module.exports = grammar({
   name: 'idk',
 
+  inline: $ => [
+    $._expression_ending_with_block,
+  ],
+
   rules: {
     source_file: $ => repeat($._statement),
 
     _statement: $ => choice(
-      $.let_statement,
-      $.expression,
-      $.semicolon,
+      $.expression_statement,
+      $._declaration_statement,
     ),
 
-    let_statement: $ => seq(
+    expression_statement: $ => choice(
+      seq($._expression, ';'),
+      prec(PREC.BLOCK_EXPRESSION, $._expression_ending_with_block),
+    ),
+
+    empty_statement: _ => ';',
+
+    _declaration_statement: $ => choice(
+      $.empty_statement,
+      $.let_declaration,
+      $.bring_declaration, // TODO
+    ),
+
+    let_declaration: $ => seq(
       'let',
-      optional('var'),
-      $.identifier,
+      optional($.var_specifier),
+      field('name', $.identifier),
       '=',
-      $.expression,
-      $.semicolon,
+      field('value', $._expression),
+      ';',
     ),
 
-    semicolon: $ => ';',
+    bring_declaration: $ => seq(
+      'bring',
+      field("module_name", choice($.identifier, $.string_literal)),
+      optional($.bring_alias),
+      ';',
+    ),
 
-    expression: $ => choice(
+    bring_alias: $ => seq("as", field("alias", $.identifier)),
+
+    var_specifier: _ => 'var',
+
+    _expression: $ => choice(
       $.identifier,
       $.member_expression,
-      $.paren_expression,
+      $.parenthesized_expression,
       $.unary_expression,
       $.binary_expression,
-      $.if_expression,
-      $.block_expression,
       $.assign_expression,
       $.call_expression,
       $.return_expression,
       $.break_expression,
       $.continue_expression,
       $.index_expression,
-      $.for_expression,
+      $.new_expression,
       $.literal,
+      $._expression_ending_with_block,
+    ),
+
+    _expression_ending_with_block: $ => choice(
+      $.block,
+      $.if_expression,
+      $.while_expression,
+      $.for_expression,
     ),
 
     unary_expression: ($) => {
@@ -71,7 +103,7 @@ module.exports = grammar({
         ...table.map(([operator, precedence]) =>
           prec.left(
             precedence,
-            seq(field("op", operator), field("arg", $.expression))
+            seq(field("op", operator), field("arg", $._expression))
           )
         )
       );
@@ -109,78 +141,101 @@ module.exports = grammar({
           return prec.left(
             precedence,
             seq(
-              field("left", $.expression),
+              field("left", $._expression),
               field("op", operator),
-              field("right", $.expression)
+              field("right", $._expression)
             )
           );
         })
       );
     },
 
-    paren_expression: $ => seq(
+    parenthesized_expression: $ => seq(
       '(',
-      $.expression,
+      $._expression,
       ')'
     ),
 
     if_expression: $ => seq(
       'if',
-      $.if_condition,
-      $.block_expression,
-      optional(seq('else', $.else_expression)),
+      field('condition', $._condition),
+      field('consequence', $.block),
+      optional(field('alternative', $.else_clause)),
     ),
 
-    if_condition: $ => choice(
-      $.expression,
-      $.if_let_pattern,
+    _condition: $ => choice(
+      $._expression,
+      $.let_condition,
     ),
 
-    if_let_pattern: $ => seq(
+    let_condition: $ => seq(
       'let',
-      $.identifier,
+      field('name', $.identifier),
       '=',
-      $.expression,
+      field('value', $._expression), // TODO: prec.left?
+    ),
+
+    else_clause: $ => seq(
+      'else',
+      choice(
+        $.if_expression,
+        $.block,
+      )
     ),
 
     else_expression: $ => choice(
       $.if_expression,
-      $.block_expression,
+      $.block,
     ),
 
-    block_expression: $ => seq(
+    block: $ => seq(
       '{',
       repeat($._statement),
-      '}'
+      optional($._expression),
+      '}',
     ),
 
     return_expression: $ => prec.left(PREC.RETURN, seq(
       'return',
-      $.expression,
+      $._expression,
     )),
 
     break_expression: $ => 'break',
     continue_expression: $ => 'continue',
 
     index_expression: $ => seq(
-      $.expression,
+      $._expression,
       '[',
-      $.expression,
+      $._expression,
       ']'
+    ),
+
+    new_expression: $ => seq(
+      'new',
+      field('type', $._expression),
+      '(',
+      sepBy(',', $._expression),
+      ')'
     ),
 
     for_expression: $ => seq(
       'for',
-      $.identifier,
+      field('name', $.identifier),
       'in',
-      $.expression,
-      $.block_expression,
+      field('value', $._expression),
+      field('body', $.block),
+    ),
+
+    while_expression: $ => seq(
+      'while',
+      field('condition', $._condition),
+      field('body', $.block),
     ),
 
     assign_expression: $ => prec.left(PREC.ASSIGN, seq(
-      $.expression,
+      $._expression,
       $.assign_operator,
-      $.expression,
+      $._expression,
     )),
 
     assign_operator: $ => choice(
@@ -190,16 +245,16 @@ module.exports = grammar({
     ),
 
     call_expression: $ => prec.left(PREC.CALL, seq(
-      $.expression,
+      $._expression,
       '(',
-      sepBy(',', $.expression),
+      sepBy(',', $._expression),
       ')'
     )),
 
     identifier: ($) => /([A-Za-z_$][A-Za-z_$0-9]*)/,
 
     member_expression: $ => prec.left(PREC.MEMBER, seq(
-      $.expression,
+      $._expression,
       $.access_operator,
       $.identifier,
     )),
