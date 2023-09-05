@@ -52,6 +52,7 @@ module.exports = grammar({
       'let',
       optional($.var_specifier),
       field('name', $.identifier),
+      optional($.type_annotation),
       '=',
       field('value', $._expression),
       ';',
@@ -59,12 +60,12 @@ module.exports = grammar({
 
     bring_declaration: $ => seq(
       'bring',
-      field("module_name", choice($.identifier, $.string_literal)),
+      field('module_name', choice($.identifier, $.string_literal)),
       optional($.bring_alias),
       ';',
     ),
 
-    bring_alias: $ => seq("as", field("alias", $.identifier)),
+    bring_alias: $ => seq('as', field('alias', $.identifier)),
 
     var_specifier: _ => 'var',
 
@@ -95,15 +96,15 @@ module.exports = grammar({
     unary_expression: ($) => {
       /** @type {Array<[RuleOrLiteral, number]>} */
       const table = [
-        ["-", PREC.UNARY],
-        ["!", PREC.UNARY],
+        ['-', PREC.UNARY],
+        ['!', PREC.UNARY],
       ];
 
       return choice(
         ...table.map(([operator, precedence]) =>
           prec.left(
             precedence,
-            seq(field("op", operator), field("arg", $._expression))
+            seq(field('op', operator), field('arg', $._expression))
           )
         )
       );
@@ -112,28 +113,28 @@ module.exports = grammar({
     binary_expression: ($) => {
       /** @type {Array<[RuleOrLiteral, number]>} */
       const table = [
-        ["+", PREC.ADD],
-        ["-", PREC.ADD],
-        ["*", PREC.MULTIPLY],
-        ["/", PREC.MULTIPLY],
-        ["\\", PREC.MULTIPLY],
-        ["%", PREC.MULTIPLY],
-        ["**", PREC.POWER],
-        ["||", PREC.LOGICAL_OR],
-        ["&&", PREC.LOGICAL_AND],
+        ['+', PREC.ADD],
+        ['-', PREC.ADD],
+        ['*', PREC.MULTIPLY],
+        ['/', PREC.MULTIPLY],
+        ['\\', PREC.MULTIPLY],
+        ['%', PREC.MULTIPLY],
+        ['**', PREC.POWER],
+        ['||', PREC.LOGICAL_OR],
+        ['&&', PREC.LOGICAL_AND],
         //['|', PREC.INCLUSIVE_OR],
         //['^', PREC.EXCLUSIVE_OR],
         //['&', PREC.BITWISE_AND],
-        ["==", PREC.EQUAL],
-        ["!=", PREC.EQUAL],
-        [">", PREC.RELATIONAL],
-        [">=", PREC.RELATIONAL],
-        ["<=", PREC.RELATIONAL],
-        ["<", PREC.RELATIONAL],
+        ['==', PREC.EQUAL],
+        ['!=', PREC.EQUAL],
+        ['>', PREC.RELATIONAL],
+        ['>=', PREC.RELATIONAL],
+        ['<=', PREC.RELATIONAL],
+        ['<', PREC.RELATIONAL],
         //['<<', PREC.SHIFT],
         //['>>', PREC.SHIFT],
         //['>>>', PREC.SHIFT],
-        ["??", PREC.UNWRAP_OR],
+        ['??', PREC.UNWRAP_OR],
       ];
 
       return choice(
@@ -141,9 +142,9 @@ module.exports = grammar({
           return prec.left(
             precedence,
             seq(
-              field("left", $._expression),
-              field("op", operator),
-              field("right", $._expression)
+              field('left', $._expression),
+              field('op', operator),
+              field('right', $._expression)
             )
           );
         })
@@ -262,6 +263,47 @@ module.exports = grammar({
     access_operator: $ => choice(
       '.',
       '?.',
+    ),
+
+    type_annotation: $ => seq(
+      ':',
+      $._type,
+    ),
+
+    _type: $ => choice(
+      $.type_path,
+      $.function_type,
+      $.optional_type,
+      $.container_type,
+      $.primitive_type,
+    ),
+
+    type_path: $ => sepBy1('.', $.identifier),
+
+    function_type: $ => prec.right(seq(
+      optional(field('phase', $.phase_specifier)),
+      '(',
+      field('parameters', sepBy(',', $._type)),
+      ')',
+      optional(seq(':', field('return_type', $._type))),
+    )),
+
+    optional_type: $ => seq(
+      $._type,
+      '?',
+    ),
+
+    container_type: $ => seq(
+      field('container_type', choice('Array', 'Set', 'Map', 'Promise')),
+      seq('<', field('element_type', $._type), '>'),
+    ),
+
+    primitive_type: $ => choice('num', 'bool', 'any', 'str', 'void', 'duration'),
+
+    phase_specifier: $ => choice(
+      'inflight',
+      // 'preflight'
+      // 'unphased'
     ),
 
     literal: $ => choice(

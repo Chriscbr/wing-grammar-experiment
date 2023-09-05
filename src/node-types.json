@@ -542,6 +542,60 @@
     }
   },
   {
+    "type": "container_type",
+    "named": true,
+    "fields": {
+      "container_type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "Array",
+            "named": false
+          },
+          {
+            "type": "Map",
+            "named": false
+          },
+          {
+            "type": "Promise",
+            "named": false
+          },
+          {
+            "type": "Set",
+            "named": false
+          }
+        ]
+      },
+      "element_type": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "container_type",
+            "named": true
+          },
+          {
+            "type": "function_type",
+            "named": true
+          },
+          {
+            "type": "optional_type",
+            "named": true
+          },
+          {
+            "type": "primitive_type",
+            "named": true
+          },
+          {
+            "type": "type_path",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "else_clause",
     "named": true,
     "fields": {},
@@ -738,6 +792,78 @@
           },
           {
             "type": "while_expression",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "function_type",
+    "named": true,
+    "fields": {
+      "parameters": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": ",",
+            "named": false
+          },
+          {
+            "type": "container_type",
+            "named": true
+          },
+          {
+            "type": "function_type",
+            "named": true
+          },
+          {
+            "type": "optional_type",
+            "named": true
+          },
+          {
+            "type": "primitive_type",
+            "named": true
+          },
+          {
+            "type": "type_path",
+            "named": true
+          }
+        ]
+      },
+      "phase": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "phase_specifier",
+            "named": true
+          }
+        ]
+      },
+      "return_type": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "container_type",
+            "named": true
+          },
+          {
+            "type": "function_type",
+            "named": true
+          },
+          {
+            "type": "optional_type",
+            "named": true
+          },
+          {
+            "type": "primitive_type",
+            "named": true
+          },
+          {
+            "type": "type_path",
             "named": true
           }
         ]
@@ -1107,9 +1233,13 @@
       }
     },
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "type_annotation",
+          "named": true
+        },
         {
           "type": "var_specifier",
           "named": true
@@ -1378,6 +1508,37 @@
     }
   },
   {
+    "type": "optional_type",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "container_type",
+          "named": true
+        },
+        {
+          "type": "function_type",
+          "named": true
+        },
+        {
+          "type": "optional_type",
+          "named": true
+        },
+        {
+          "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "type_path",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "parenthesized_expression",
     "named": true,
     "fields": {},
@@ -1455,6 +1616,16 @@
         }
       ]
     }
+  },
+  {
+    "type": "phase_specifier",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "primitive_type",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "return_expression",
@@ -1557,6 +1728,52 @@
         },
         {
           "type": "let_declaration",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "type_annotation",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "container_type",
+          "named": true
+        },
+        {
+          "type": "function_type",
+          "named": true
+        },
+        {
+          "type": "optional_type",
+          "named": true
+        },
+        {
+          "type": "primitive_type",
+          "named": true
+        },
+        {
+          "type": "type_path",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "type_path",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
           "named": true
         }
       ]
@@ -1811,6 +2028,10 @@
     "named": false
   },
   {
+    "type": ":",
+    "named": false
+  },
+  {
     "type": ";",
     "named": false
   },
@@ -1839,11 +2060,31 @@
     "named": false
   },
   {
+    "type": "?",
+    "named": false
+  },
+  {
     "type": "?.",
     "named": false
   },
   {
     "type": "??",
+    "named": false
+  },
+  {
+    "type": "Array",
+    "named": false
+  },
+  {
+    "type": "Map",
+    "named": false
+  },
+  {
+    "type": "Promise",
+    "named": false
+  },
+  {
+    "type": "Set",
     "named": false
   },
   {
@@ -1859,7 +2100,15 @@
     "named": false
   },
   {
+    "type": "any",
+    "named": false
+  },
+  {
     "type": "as",
+    "named": false
+  },
+  {
+    "type": "bool",
     "named": false
   },
   {
@@ -1873,6 +2122,10 @@
   {
     "type": "continue_expression",
     "named": true
+  },
+  {
+    "type": "duration",
+    "named": false
   },
   {
     "type": "else",
@@ -1899,6 +2152,10 @@
     "named": false
   },
   {
+    "type": "inflight",
+    "named": false
+  },
+  {
     "type": "let",
     "named": false
   },
@@ -1907,11 +2164,19 @@
     "named": false
   },
   {
+    "type": "num",
+    "named": false
+  },
+  {
     "type": "number_literal",
     "named": true
   },
   {
     "type": "return",
+    "named": false
+  },
+  {
+    "type": "str",
     "named": false
   },
   {
@@ -1925,6 +2190,10 @@
   {
     "type": "var_specifier",
     "named": true
+  },
+  {
+    "type": "void",
+    "named": false
   },
   {
     "type": "while",
