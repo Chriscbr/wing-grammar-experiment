@@ -4,7 +4,8 @@ Hacking on grammars that support block-style expressions like Rust.
 
 <details>
 <summary>Code example</summary>
-<code>
+
+```
 bring cloud;
 bring "@cdktf/provider-aws" as cdk;
 
@@ -46,7 +47,8 @@ cloud.Bucket.for(exp);
 new cloud.Bucket();
 
 return 5;
-</code>
+```
+
 </details>
 
 https://github.com/rust-lang/wg-grammar/tree/7a1bd645fd50d8783da7e2010da8bcc226d656ea/grammar
