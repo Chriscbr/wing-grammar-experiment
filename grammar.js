@@ -1,4 +1,5 @@
 const PREC = {
+  TYPE_PATH: -100,
   RETURN: 0,
   ASSIGN: 10,
   BLOCK_EXPRESSION: 20,
@@ -18,7 +19,6 @@ const PREC = {
   POWER: 240,
   MEMBER: 250,
   CALL: 260,
-  TYPE_PATH: 300,
 };
 
 module.exports = grammar({
@@ -195,7 +195,7 @@ module.exports = grammar({
     block: $ => seq(
       '{',
       choice(
-        seq(repeat1($.empty_statement), optional($._expression)),
+        seq(repeat1($._statement), optional($._expression)),
         $._expression,
       ),
       '}',
@@ -263,7 +263,7 @@ module.exports = grammar({
       $.identifier,
     )),
 
-    access_operator: _ => choice(
+    access_operator: $ => choice(
       '.',
       '?.',
     ),
@@ -275,7 +275,7 @@ module.exports = grammar({
     ),
 
     object_literal_expression: $ => seq(
-      optional($.type_path),
+      field('type_path', optional($.type_path)),
       '{',
       sepBy(',', $.object_literal_property),
       '}',

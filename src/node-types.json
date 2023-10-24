@@ -456,6 +456,10 @@
           "named": true
         },
         {
+          "type": "bring_declaration",
+          "named": true
+        },
+        {
           "type": "call_expression",
           "named": true
         },
@@ -465,6 +469,10 @@
         },
         {
           "type": "empty_statement",
+          "named": true
+        },
+        {
+          "type": "expression_statement",
           "named": true
         },
         {
@@ -481,6 +489,10 @@
         },
         {
           "type": "index_expression",
+          "named": true
+        },
+        {
+          "type": "let_declaration",
           "named": true
         },
         {
@@ -1689,17 +1701,24 @@
   {
     "type": "object_literal_expression",
     "named": true,
-    "fields": {},
+    "fields": {
+      "type_path": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "type_path",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
       "required": false,
       "types": [
         {
           "type": "object_literal_property",
-          "named": true
-        },
-        {
-          "type": "type_path",
           "named": true
         }
       ]

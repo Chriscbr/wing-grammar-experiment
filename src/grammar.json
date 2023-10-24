@@ -1018,7 +1018,7 @@
                   "type": "REPEAT1",
                   "content": {
                     "type": "SYMBOL",
-                    "name": "empty_statement"
+                    "name": "_statement"
                   }
                 },
                 {
@@ -1389,16 +1389,20 @@
       "type": "SEQ",
       "members": [
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "type_path"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
+          "type": "FIELD",
+          "name": "type_path",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "type_path"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          }
         },
         {
           "type": "STRING",
@@ -1504,7 +1508,7 @@
     },
     "type_path": {
       "type": "PREC",
-      "value": 300,
+      "value": -100,
       "content": {
         "type": "SEQ",
         "members": [
